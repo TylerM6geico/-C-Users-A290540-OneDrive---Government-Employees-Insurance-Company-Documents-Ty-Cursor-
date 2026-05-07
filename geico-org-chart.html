@@ -1,0 +1,1005 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GEICO – Org Chart & Capacity Planning</title>
+  <style>
+    /* ───────────────────────────── Reset / Base ─────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: #f4f6f9;
+      color: #1a1a2e;
+    }
+
+    /* ───────────────────────────── Header ──────────────────────────────── */
+    .site-header {
+      background: linear-gradient(135deg, #003087 0%, #0055b3 100%);
+      color: #fff;
+      padding: 18px 32px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      box-shadow: 0 2px 8px rgba(0,0,0,.25);
+    }
+    .site-header .logo {
+      font-size: 1.8rem;
+      font-weight: 900;
+      letter-spacing: -1px;
+      color: #ffd700;
+    }
+    .site-header h1 {
+      font-size: 1.25rem;
+      font-weight: 600;
+    }
+
+    /* ───────────────────────────── Nav Tabs ────────────────────────────── */
+    .tabs {
+      display: flex;
+      background: #fff;
+      border-bottom: 2px solid #dce3ee;
+      padding: 0 32px;
+    }
+    .tab-btn {
+      padding: 12px 24px;
+      border: none;
+      background: none;
+      cursor: pointer;
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: #555;
+      border-bottom: 3px solid transparent;
+      transition: color .2s, border-color .2s;
+    }
+    .tab-btn:hover { color: #0055b3; }
+    .tab-btn.active { color: #003087; border-bottom-color: #003087; }
+
+    /* ───────────────────────────── Section Wrapper ─────────────────────── */
+    .section { display: none; padding: 28px 32px; }
+    .section.active { display: block; }
+
+    /* ═══════════════════════ ORG CHART STYLES ═══════════════════════════ */
+    .org-chart-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #003087;
+      margin-bottom: 20px;
+    }
+    .org-tree {
+      overflow-x: auto;
+      padding-bottom: 12px;
+    }
+    .org-level {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      margin-bottom: 0;
+    }
+    .org-connector-row {
+      display: flex;
+      justify-content: center;
+      margin: 0;
+    }
+    .org-branch-lines {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      padding-bottom: 8px;
+      border-top: 2px solid #aac0de;
+      margin: 0 auto;
+    }
+    .org-card {
+      background: #fff;
+      border: 1.5px solid #c8d6ea;
+      border-radius: 8px;
+      padding: 12px 18px;
+      min-width: 160px;
+      max-width: 200px;
+      text-align: center;
+      box-shadow: 0 1px 4px rgba(0,0,0,.08);
+      position: relative;
+    }
+    .org-card.root {
+      background: linear-gradient(135deg, #003087, #0055b3);
+      color: #fff;
+      border-color: #003087;
+      min-width: 200px;
+    }
+    .org-card .name {
+      font-weight: 700;
+      font-size: 0.9rem;
+    }
+    .org-card .title {
+      font-size: 0.75rem;
+      color: #6b7c99;
+      margin-top: 2px;
+    }
+    .org-card.root .title { color: #b3c9e8; }
+    .org-card .dept {
+      display: inline-block;
+      background: #e8f0ff;
+      color: #003087;
+      font-size: 0.7rem;
+      border-radius: 4px;
+      padding: 2px 7px;
+      margin-top: 5px;
+      font-weight: 600;
+    }
+    .org-card.root .dept { background: rgba(255,255,255,.2); color: #ffd700; }
+    .vert-line {
+      width: 2px;
+      height: 24px;
+      background: #aac0de;
+      margin: 0 auto;
+    }
+    .horiz-tree {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      position: relative;
+      padding-top: 24px;
+    }
+    .horiz-tree::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 50%;
+      width: 1px;
+      height: 24px;
+      background: #aac0de;
+    }
+    .tree-group {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0;
+    }
+    .tree-group-children {
+      display: flex;
+      gap: 12px;
+      position: relative;
+      padding-top: 24px;
+    }
+    .tree-group-children::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: calc(50% - 1px);
+      width: 2px;
+      height: 24px;
+      background: #aac0de;
+    }
+
+    /* ═══════════════════════ CAPACITY PLANNING STYLES ═══════════════════ */
+    .cp-toolbar {
+      background: #fff;
+      border: 1px solid #dce3ee;
+      border-radius: 10px;
+      padding: 18px 22px;
+      margin-bottom: 22px;
+      box-shadow: 0 1px 4px rgba(0,0,0,.06);
+    }
+    .cp-toolbar-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+    .cp-toolbar-top h2 {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #003087;
+    }
+    .cp-toolbar-controls {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .cp-toolbar-controls label {
+      font-size: 0.85rem;
+      color: #555;
+      margin-right: 4px;
+    }
+    select.cp-quarter-select {
+      border: 1.5px solid #c8d6ea;
+      border-radius: 6px;
+      padding: 5px 10px;
+      font-size: 0.85rem;
+      color: #1a1a2e;
+      background: #f8fafc;
+      cursor: pointer;
+    }
+
+    /* ── Priority Filter Bar ── */
+    .priority-filter-bar {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .priority-filter-bar .filter-label {
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: #444;
+      text-transform: uppercase;
+      letter-spacing: .05em;
+      margin-right: 4px;
+    }
+
+    /* Each priority chip acts as a toggleable checkbox-button */
+    .priority-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 5px 14px 5px 10px;
+      border-radius: 20px;
+      border: 2px solid transparent;
+      cursor: pointer;
+      font-size: 0.82rem;
+      font-weight: 700;
+      user-select: none;
+      transition: opacity .15s, box-shadow .15s, transform .1s;
+      position: relative;
+    }
+    .priority-chip input[type="checkbox"] {
+      position: absolute;
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    .priority-chip .chip-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    /* Selected state */
+    .priority-chip.selected {
+      box-shadow: 0 0 0 2px currentColor, 0 2px 6px rgba(0,0,0,.12);
+    }
+    /* Deselected state – visually muted */
+    .priority-chip:not(.selected) {
+      opacity: 0.42;
+      filter: grayscale(40%);
+    }
+    .priority-chip:hover { transform: translateY(-1px); opacity: 1; filter: none; }
+
+    /* Select-All chip */
+    .priority-chip.select-all {
+      background: #f0f4ff !important;
+      color: #003087 !important;
+      border-color: #003087 !important;
+    }
+    .priority-chip.select-all.selected {
+      background: #003087 !important;
+      color: #fff !important;
+      box-shadow: 0 0 0 2px #003087, 0 2px 6px rgba(0,0,0,.12);
+    }
+
+    /* Individual priority colors */
+    .chip-critical  { background: #fde8e8; color: #b91c1c; border-color: #f87171; }
+    .chip-high      { background: #fff3e0; color: #b45309; border-color: #fbbf24; }
+    .chip-medium    { background: #e8f5e9; color: #166534; border-color: #4ade80; }
+    .chip-low       { background: #e8f0ff; color: #1e40af; border-color: #93c5fd; }
+
+    .chip-critical.selected  { box-shadow: 0 0 0 2px #b91c1c, 0 2px 6px rgba(0,0,0,.12); }
+    .chip-high.selected      { box-shadow: 0 0 0 2px #b45309, 0 2px 6px rgba(0,0,0,.12); }
+    .chip-medium.selected    { box-shadow: 0 0 0 2px #166534, 0 2px 6px rgba(0,0,0,.12); }
+    .chip-low.selected       { box-shadow: 0 0 0 2px #1e40af, 0 2px 6px rgba(0,0,0,.12); }
+
+    /* ── Initiative Grid ── */
+    .cp-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 18px;
+    }
+
+    /* Initiative card */
+    .initiative-card {
+      background: #fff;
+      border-radius: 10px;
+      border: 1.5px solid #dce3ee;
+      box-shadow: 0 1px 6px rgba(0,0,0,.07);
+      overflow: hidden;
+      transition: box-shadow .2s, transform .2s;
+    }
+    .initiative-card:hover {
+      box-shadow: 0 4px 16px rgba(0,0,0,.12);
+      transform: translateY(-2px);
+    }
+    .initiative-card.hidden { display: none; }
+
+    /* The selectable priority header bar */
+    .initiative-priority-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 7px 14px;
+      cursor: pointer;
+      user-select: none;
+      position: relative;
+      transition: filter .15s;
+    }
+    .initiative-priority-bar:hover { filter: brightness(0.92); }
+    .initiative-priority-bar .bar-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .priority-icon {
+      width: 18px;
+      height: 18px;
+      border-radius: 4px;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      font-weight: 900;
+    }
+    .bar-priority-label {
+      font-size: 0.76rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+    }
+    .bar-check {
+      width: 18px;
+      height: 18px;
+      border-radius: 4px;
+      border: 2px solid rgba(255,255,255,.7);
+      background: rgba(255,255,255,.15);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      color: transparent;
+      transition: background .15s, color .15s;
+    }
+    .initiative-card.bar-selected .bar-check {
+      background: rgba(255,255,255,.9);
+      color: inherit; /* overridden per priority */
+    }
+
+    /* Priority bar colour themes */
+    .bar-critical { background: #dc2626; color: #fff; }
+    .bar-critical .bar-check.checked { color: #dc2626; }
+    .bar-high     { background: #d97706; color: #fff; }
+    .bar-high     .bar-check.checked { color: #d97706; }
+    .bar-medium   { background: #16a34a; color: #fff; }
+    .bar-medium   .bar-check.checked { color: #16a34a; }
+    .bar-low      { background: #2563eb; color: #fff; }
+    .bar-low      .bar-check.checked { color: #2563eb; }
+
+    /* Card body */
+    .initiative-body { padding: 14px 16px; }
+    .initiative-name {
+      font-size: 0.92rem;
+      font-weight: 700;
+      color: #1a1a2e;
+      margin-bottom: 6px;
+    }
+    .initiative-meta {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 10px;
+    }
+    .meta-badge {
+      font-size: 0.7rem;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 4px;
+      background: #f0f4ff;
+      color: #334;
+    }
+    .initiative-progress-label {
+      font-size: 0.72rem;
+      color: #6b7c99;
+      margin-bottom: 4px;
+      display: flex;
+      justify-content: space-between;
+    }
+    .initiative-progress-track {
+      height: 6px;
+      background: #e8edf5;
+      border-radius: 6px;
+      overflow: hidden;
+      margin-bottom: 10px;
+    }
+    .initiative-progress-fill {
+      height: 100%;
+      border-radius: 6px;
+      background: linear-gradient(90deg, #0055b3, #38bdf8);
+      transition: width .4s ease;
+    }
+    .initiative-team {
+      font-size: 0.75rem;
+      color: #6b7c99;
+    }
+    .initiative-team span {
+      font-weight: 600;
+      color: #003087;
+    }
+
+    /* Selection summary bar */
+    .selection-summary {
+      background: #003087;
+      color: #fff;
+      border-radius: 8px;
+      padding: 10px 18px;
+      margin-bottom: 18px;
+      font-size: 0.85rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 8px;
+      transition: opacity .2s;
+    }
+    .selection-summary.hidden { display: none; }
+    .selection-summary strong { font-size: 0.95rem; }
+    .summary-badges { display: flex; gap: 8px; flex-wrap: wrap; }
+    .summary-badge {
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 2px 10px;
+      border-radius: 12px;
+      background: rgba(255,255,255,.18);
+      cursor: pointer;
+    }
+    .summary-badge:hover { background: rgba(255,255,255,.3); }
+    .btn-clear-selection {
+      background: rgba(255,255,255,.15);
+      border: 1px solid rgba(255,255,255,.4);
+      color: #fff;
+      border-radius: 6px;
+      padding: 4px 14px;
+      cursor: pointer;
+      font-size: 0.8rem;
+      font-weight: 600;
+      transition: background .15s;
+    }
+    .btn-clear-selection:hover { background: rgba(255,255,255,.3); }
+
+    /* ───────────── Responsive ─────────────── */
+    @media (max-width: 600px) {
+      .section { padding: 16px; }
+      .cp-grid { grid-template-columns: 1fr; }
+      .tabs .tab-btn { padding: 10px 14px; font-size: 0.82rem; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ═══════════════════════ HEADER ═══════════════════════════════════════ -->
+<header class="site-header">
+  <div class="logo">GEICO</div>
+  <h1>Technology &amp; Operations – Org Chart &amp; Capacity Planning</h1>
+</header>
+
+<!-- ═══════════════════════ NAVIGATION TABS ══════════════════════════════ -->
+<nav class="tabs">
+  <button class="tab-btn active" data-tab="org-chart">Org Chart</button>
+  <button class="tab-btn" data-tab="capacity-planning">Capacity Planning</button>
+</nav>
+
+<!-- ═══════════════════════ ORG CHART SECTION ════════════════════════════ -->
+<section id="org-chart" class="section active">
+  <div class="org-chart-title">Technology &amp; Operations – Leadership Structure</div>
+  <div class="org-tree">
+    <!-- Root -->
+    <div class="org-level">
+      <div class="org-card root">
+        <div class="name">Chris Cavallo</div>
+        <div class="title">EVP &amp; CTO</div>
+        <div class="dept">Technology &amp; Operations</div>
+      </div>
+    </div>
+    <div class="vert-line"></div>
+
+    <!-- L2 -->
+    <div class="org-level" style="gap:24px;">
+      <div class="org-card">
+        <div class="name">Platform Engineering</div>
+        <div class="title">VP, Platform &amp; Infrastructure</div>
+        <div class="dept">Platform</div>
+      </div>
+      <div class="org-card">
+        <div class="name">Product Engineering</div>
+        <div class="title">VP, Product &amp; App Dev</div>
+        <div class="dept">Engineering</div>
+      </div>
+      <div class="org-card">
+        <div class="name">Data &amp; Analytics</div>
+        <div class="title">VP, Data Science &amp; Analytics</div>
+        <div class="dept">Data</div>
+      </div>
+      <div class="org-card">
+        <div class="name">Cybersecurity</div>
+        <div class="title">VP &amp; CISO</div>
+        <div class="dept">Security</div>
+      </div>
+      <div class="org-card">
+        <div class="name">Enterprise Architecture</div>
+        <div class="title">VP, Architecture</div>
+        <div class="dept">Architecture</div>
+      </div>
+    </div>
+    <div class="vert-line" style="height:10px; background:transparent;"></div>
+
+    <!-- L3 sample under Product Engineering -->
+    <div class="org-level" style="gap:16px; margin-top:0;">
+      <div class="org-card" style="min-width:140px;max-width:165px;">
+        <div class="name">Cloud &amp; DevOps</div>
+        <div class="title">Senior Director</div>
+        <div class="dept">Platform</div>
+      </div>
+      <div class="org-card" style="min-width:140px;max-width:165px;">
+        <div class="name">Auto Insurance</div>
+        <div class="title">Senior Director</div>
+        <div class="dept">Engineering</div>
+      </div>
+      <div class="org-card" style="min-width:140px;max-width:165px;">
+        <div class="name">Claims</div>
+        <div class="title">Senior Director</div>
+        <div class="dept">Engineering</div>
+      </div>
+      <div class="org-card" style="min-width:140px;max-width:165px;">
+        <div class="name">ML Platform</div>
+        <div class="title">Senior Director</div>
+        <div class="dept">Data</div>
+      </div>
+      <div class="org-card" style="min-width:140px;max-width:165px;">
+        <div class="name">SOC Operations</div>
+        <div class="title">Senior Director</div>
+        <div class="dept">Security</div>
+      </div>
+      <div class="org-card" style="min-width:140px;max-width:165px;">
+        <div class="name">Digital Channels</div>
+        <div class="title">Senior Director</div>
+        <div class="dept">Engineering</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════ CAPACITY PLANNING SECTION ════════════════════ -->
+<section id="capacity-planning" class="section">
+
+  <!-- Toolbar -->
+  <div class="cp-toolbar">
+    <div class="cp-toolbar-top">
+      <h2>Capacity Planning – Initiative Tracker</h2>
+      <div class="cp-toolbar-controls">
+        <label for="quarterSelect">Quarter:</label>
+        <select id="quarterSelect" class="cp-quarter-select">
+          <option value="Q1-2026">Q1 2026</option>
+          <option value="Q2-2026" selected>Q2 2026</option>
+          <option value="Q3-2026">Q3 2026</option>
+          <option value="Q4-2026">Q4 2026</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- ── Priority Filter ── -->
+    <div class="priority-filter-bar" id="priorityFilterBar">
+      <span class="filter-label">Filter by Priority:</span>
+
+      <!-- Select All -->
+      <label class="priority-chip select-all selected" data-priority="all" title="Select / Deselect All">
+        <input type="checkbox" checked />
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none" style="flex-shrink:0">
+          <rect width="12" height="12" rx="3" fill="currentColor" opacity=".25"/>
+          <path d="M2.5 6l2.5 2.5 4.5-4.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        Select All
+      </label>
+
+      <!-- Critical -->
+      <label class="priority-chip chip-critical selected" data-priority="critical" title="Critical priority">
+        <input type="checkbox" checked />
+        <span class="chip-dot" style="background:#dc2626;"></span>
+        Critical
+      </label>
+
+      <!-- High -->
+      <label class="priority-chip chip-high selected" data-priority="high" title="High priority">
+        <input type="checkbox" checked />
+        <span class="chip-dot" style="background:#d97706;"></span>
+        High
+      </label>
+
+      <!-- Medium -->
+      <label class="priority-chip chip-medium selected" data-priority="medium" title="Medium priority">
+        <input type="checkbox" checked />
+        <span class="chip-dot" style="background:#16a34a;"></span>
+        Medium
+      </label>
+
+      <!-- Low -->
+      <label class="priority-chip chip-low selected" data-priority="low" title="Low priority">
+        <input type="checkbox" checked />
+        <span class="chip-dot" style="background:#2563eb;"></span>
+        Low
+      </label>
+    </div>
+  </div>
+
+  <!-- Selection summary (shown when individual cards are selected) -->
+  <div id="selectionSummary" class="selection-summary hidden">
+    <div>
+      <strong id="summaryCount">0</strong> initiative(s) selected
+      <div class="summary-badges" id="summaryBadges"></div>
+    </div>
+    <button class="btn-clear-selection" id="btnClearSelection">Clear Selection</button>
+  </div>
+
+  <!-- Initiative Cards Grid -->
+  <div class="cp-grid" id="cpGrid">
+
+    <!-- ── CRITICAL initiatives ── -->
+    <div class="initiative-card" data-priority="critical">
+      <div class="initiative-priority-bar bar-critical" title="Click to select this initiative">
+        <div class="bar-left">
+          <div class="priority-icon" style="background:rgba(255,255,255,.25);color:#fff;">!</div>
+          <span class="bar-priority-label">Critical</span>
+        </div>
+        <div class="bar-check"></div>
+      </div>
+      <div class="initiative-body">
+        <div class="initiative-name">Core Policy Administration Migration</div>
+        <div class="initiative-meta">
+          <span class="meta-badge">Platform Engineering</span>
+          <span class="meta-badge">Q2 2026</span>
+        </div>
+        <div class="initiative-progress-label"><span>Progress</span><span>68%</span></div>
+        <div class="initiative-progress-track"><div class="initiative-progress-fill" style="width:68%"></div></div>
+        <div class="initiative-team">Lead: <span>Platform Engineering</span></div>
+      </div>
+    </div>
+
+    <div class="initiative-card" data-priority="critical">
+      <div class="initiative-priority-bar bar-critical" title="Click to select this initiative">
+        <div class="bar-left">
+          <div class="priority-icon" style="background:rgba(255,255,255,.25);color:#fff;">!</div>
+          <span class="bar-priority-label">Critical</span>
+        </div>
+        <div class="bar-check"></div>
+      </div>
+      <div class="initiative-body">
+        <div class="initiative-name">Cybersecurity Zero-Trust Rollout</div>
+        <div class="initiative-meta">
+          <span class="meta-badge">Cybersecurity</span>
+          <span class="meta-badge">Q2–Q3 2026</span>
+        </div>
+        <div class="initiative-progress-label"><span>Progress</span><span>41%</span></div>
+        <div class="initiative-progress-track"><div class="initiative-progress-fill" style="width:41%"></div></div>
+        <div class="initiative-team">Lead: <span>Cybersecurity</span></div>
+      </div>
+    </div>
+
+    <!-- ── HIGH initiatives ── -->
+    <div class="initiative-card" data-priority="high">
+      <div class="initiative-priority-bar bar-high" title="Click to select this initiative">
+        <div class="bar-left">
+          <div class="priority-icon" style="background:rgba(255,255,255,.25);color:#fff;">↑</div>
+          <span class="bar-priority-label">High</span>
+        </div>
+        <div class="bar-check"></div>
+      </div>
+      <div class="initiative-body">
+        <div class="initiative-name">Claims Digital Experience Redesign</div>
+        <div class="initiative-meta">
+          <span class="meta-badge">Product Engineering</span>
+          <span class="meta-badge">Q2 2026</span>
+        </div>
+        <div class="initiative-progress-label"><span>Progress</span><span>55%</span></div>
+        <div class="initiative-progress-track"><div class="initiative-progress-fill" style="width:55%"></div></div>
+        <div class="initiative-team">Lead: <span>Claims</span></div>
+      </div>
+    </div>
+
+    <div class="initiative-card" data-priority="high">
+      <div class="initiative-priority-bar bar-high" title="Click to select this initiative">
+        <div class="bar-left">
+          <div class="priority-icon" style="background:rgba(255,255,255,.25);color:#fff;">↑</div>
+          <span class="bar-priority-label">High</span>
+        </div>
+        <div class="bar-check"></div>
+      </div>
+      <div class="initiative-body">
+        <div class="initiative-name">ML Pricing Model Refresh</div>
+        <div class="initiative-meta">
+          <span class="meta-badge">Data &amp; Analytics</span>
+          <span class="meta-badge">Q2 2026</span>
+        </div>
+        <div class="initiative-progress-label"><span>Progress</span><span>80%</span></div>
+        <div class="initiative-progress-track"><div class="initiative-progress-fill" style="width:80%"></div></div>
+        <div class="initiative-team">Lead: <span>ML Platform</span></div>
+      </div>
+    </div>
+
+    <div class="initiative-card" data-priority="high">
+      <div class="initiative-priority-bar bar-high" title="Click to select this initiative">
+        <div class="bar-left">
+          <div class="priority-icon" style="background:rgba(255,255,255,.25);color:#fff;">↑</div>
+          <span class="bar-priority-label">High</span>
+        </div>
+        <div class="bar-check"></div>
+      </div>
+      <div class="initiative-body">
+        <div class="initiative-name">Cloud Cost Optimisation Programme</div>
+        <div class="initiative-meta">
+          <span class="meta-badge">Cloud &amp; DevOps</span>
+          <span class="meta-badge">Q2–Q4 2026</span>
+        </div>
+        <div class="initiative-progress-label"><span>Progress</span><span>22%</span></div>
+        <div class="initiative-progress-track"><div class="initiative-progress-fill" style="width:22%"></div></div>
+        <div class="initiative-team">Lead: <span>Platform Engineering</span></div>
+      </div>
+    </div>
+
+    <!-- ── MEDIUM initiatives ── -->
+    <div class="initiative-card" data-priority="medium">
+      <div class="initiative-priority-bar bar-medium" title="Click to select this initiative">
+        <div class="bar-left">
+          <div class="priority-icon" style="background:rgba(255,255,255,.25);color:#fff;">–</div>
+          <span class="bar-priority-label">Medium</span>
+        </div>
+        <div class="bar-check"></div>
+      </div>
+      <div class="initiative-body">
+        <div class="initiative-name">Agent Portal Self-Service Tools</div>
+        <div class="initiative-meta">
+          <span class="meta-badge">Digital Channels</span>
+          <span class="meta-badge">Q3 2026</span>
+        </div>
+        <div class="initiative-progress-label"><span>Progress</span><span>30%</span></div>
+        <div class="initiative-progress-track"><div class="initiative-progress-fill" style="width:30%"></div></div>
+        <div class="initiative-team">Lead: <span>Product Engineering</span></div>
+      </div>
+    </div>
+
+    <div class="initiative-card" data-priority="medium">
+      <div class="initiative-priority-bar bar-medium" title="Click to select this initiative">
+        <div class="bar-left">
+          <div class="priority-icon" style="background:rgba(255,255,255,.25);color:#fff;">–</div>
+          <span class="bar-priority-label">Medium</span>
+        </div>
+        <div class="bar-check"></div>
+      </div>
+      <div class="initiative-body">
+        <div class="initiative-name">Enterprise Data Catalogue v2</div>
+        <div class="initiative-meta">
+          <span class="meta-badge">Data &amp; Analytics</span>
+          <span class="meta-badge">Q2 2026</span>
+        </div>
+        <div class="initiative-progress-label"><span>Progress</span><span>60%</span></div>
+        <div class="initiative-progress-track"><div class="initiative-progress-fill" style="width:60%"></div></div>
+        <div class="initiative-team">Lead: <span>Data &amp; Analytics</span></div>
+      </div>
+    </div>
+
+    <!-- ── LOW initiatives ── -->
+    <div class="initiative-card" data-priority="low">
+      <div class="initiative-priority-bar bar-low" title="Click to select this initiative">
+        <div class="bar-left">
+          <div class="priority-icon" style="background:rgba(255,255,255,.25);color:#fff;">↓</div>
+          <span class="bar-priority-label">Low</span>
+        </div>
+        <div class="bar-check"></div>
+      </div>
+      <div class="initiative-body">
+        <div class="initiative-name">Internal Dev Documentation Portal</div>
+        <div class="initiative-meta">
+          <span class="meta-badge">Enterprise Architecture</span>
+          <span class="meta-badge">Q4 2026</span>
+        </div>
+        <div class="initiative-progress-label"><span>Progress</span><span>10%</span></div>
+        <div class="initiative-progress-track"><div class="initiative-progress-fill" style="width:10%"></div></div>
+        <div class="initiative-team">Lead: <span>Architecture</span></div>
+      </div>
+    </div>
+
+    <div class="initiative-card" data-priority="low">
+      <div class="initiative-priority-bar bar-low" title="Click to select this initiative">
+        <div class="bar-left">
+          <div class="priority-icon" style="background:rgba(255,255,255,.25);color:#fff;">↓</div>
+          <span class="bar-priority-label">Low</span>
+        </div>
+        <div class="bar-check"></div>
+      </div>
+      <div class="initiative-body">
+        <div class="initiative-name">Tooling Standardisation Initiative</div>
+        <div class="initiative-meta">
+          <span class="meta-badge">Platform Engineering</span>
+          <span class="meta-badge">Q3–Q4 2026</span>
+        </div>
+        <div class="initiative-progress-label"><span>Progress</span><span>5%</span></div>
+        <div class="initiative-progress-track"><div class="initiative-progress-fill" style="width:5%"></div></div>
+        <div class="initiative-team">Lead: <span>Cloud &amp; DevOps</span></div>
+      </div>
+    </div>
+
+  </div><!-- /cp-grid -->
+</section><!-- /capacity-planning -->
+
+<!-- ═══════════════════════ JAVASCRIPT ════════════════════════════════════ -->
+<script>
+  /* ── Tab navigation ── */
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById(btn.dataset.tab).classList.add('active');
+    });
+  });
+
+  /* ════════════════════════════════════════════════════════════════════════
+     PRIORITY FILTER LOGIC
+     ════════════════════════════════════════════════════════════════════════ */
+  const PRIORITIES = ['critical', 'high', 'medium', 'low'];
+
+  // State: which priority filter chips are active (visible)
+  const filterState = { critical: true, high: true, medium: true, low: true };
+
+  // State: which individual initiative cards have their bar-selected
+  const selectedCards = new Set();
+
+  /* ── Helpers ── */
+  function getChip(priority) {
+    return document.querySelector(`.priority-chip[data-priority="${priority}"]`);
+  }
+  function getAllCards() {
+    return Array.from(document.querySelectorAll('.initiative-card'));
+  }
+  function getCardsByPriority(priority) {
+    return Array.from(document.querySelectorAll(`.initiative-card[data-priority="${priority}"]`));
+  }
+
+  /* ── Update filter visibility of cards ── */
+  function applyCardVisibility() {
+    getAllCards().forEach(card => {
+      const p = card.dataset.priority;
+      if (filterState[p]) {
+        card.classList.remove('hidden');
+      } else {
+        card.classList.add('hidden');
+        // also deselect hidden cards
+        if (selectedCards.has(card)) {
+          selectedCards.delete(card);
+          card.classList.remove('bar-selected');
+          card.querySelector('.bar-check').classList.remove('checked');
+        }
+      }
+    });
+    updateSelectionSummary();
+  }
+
+  /* ── Sync the "Select All" chip state ── */
+  function syncSelectAllChip() {
+    const allOn = PRIORITIES.every(p => filterState[p]);
+    const allChip = getChip('all');
+    if (allOn) {
+      allChip.classList.add('selected');
+      allChip.querySelector('input').checked = true;
+    } else {
+      allChip.classList.remove('selected');
+      allChip.querySelector('input').checked = false;
+    }
+  }
+
+  /* ── Update selection summary bar ── */
+  function updateSelectionSummary() {
+    const summary = document.getElementById('selectionSummary');
+    const countEl = document.getElementById('summaryCount');
+    const badgesEl = document.getElementById('summaryBadges');
+
+    if (selectedCards.size === 0) {
+      summary.classList.add('hidden');
+      return;
+    }
+    summary.classList.remove('hidden');
+    countEl.textContent = selectedCards.size;
+
+    // Build badges grouped by priority
+    const byPriority = {};
+    selectedCards.forEach(card => {
+      const p = card.dataset.priority;
+      byPriority[p] = (byPriority[p] || 0) + 1;
+    });
+    badgesEl.innerHTML = Object.entries(byPriority)
+      .map(([p, n]) => `<span class="summary-badge">${capitalize(p)}: ${n}</span>`)
+      .join('');
+  }
+
+  function capitalize(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
+
+  /* ── Priority filter chip click handler ── */
+  document.getElementById('priorityFilterBar').addEventListener('click', e => {
+    const chip = e.target.closest('.priority-chip');
+    if (!chip) return;
+    e.preventDefault(); // we manage state manually
+
+    const priority = chip.dataset.priority;
+
+    if (priority === 'all') {
+      // Toggle: if all already on → turn all off; if any off → turn all on
+      const allOn = PRIORITIES.every(p => filterState[p]);
+      PRIORITIES.forEach(p => {
+        filterState[p] = !allOn;
+        const c = getChip(p);
+        c.querySelector('input').checked = !allOn;
+        if (!allOn) c.classList.add('selected'); else c.classList.remove('selected');
+      });
+      chip.querySelector('input').checked = !allOn;
+      if (!allOn) chip.classList.add('selected'); else chip.classList.remove('selected');
+    } else {
+      // Toggle individual priority
+      filterState[priority] = !filterState[priority];
+      chip.querySelector('input').checked = filterState[priority];
+      if (filterState[priority]) chip.classList.add('selected');
+      else chip.classList.remove('selected');
+      syncSelectAllChip();
+    }
+
+    applyCardVisibility();
+  });
+
+  /* ── Initiative card priority bar click handler (individual selection) ── */
+  document.getElementById('cpGrid').addEventListener('click', e => {
+    const bar = e.target.closest('.initiative-priority-bar');
+    if (!bar) return;
+
+    const card = bar.closest('.initiative-card');
+    const checkEl = bar.querySelector('.bar-check');
+
+    if (selectedCards.has(card)) {
+      selectedCards.delete(card);
+      card.classList.remove('bar-selected');
+      checkEl.classList.remove('checked');
+      checkEl.textContent = '';
+    } else {
+      selectedCards.add(card);
+      card.classList.add('bar-selected');
+      checkEl.classList.add('checked');
+      checkEl.textContent = '✓';
+    }
+    updateSelectionSummary();
+  });
+
+  /* ── Clear all bar-selections ── */
+  document.getElementById('btnClearSelection').addEventListener('click', () => {
+    selectedCards.forEach(card => {
+      card.classList.remove('bar-selected');
+      const chk = card.querySelector('.bar-check');
+      chk.classList.remove('checked');
+      chk.textContent = '';
+    });
+    selectedCards.clear();
+    updateSelectionSummary();
+  });
+
+  /* ── Summary badge click → filter to that priority only ── */
+  document.getElementById('summaryBadges').addEventListener('click', e => {
+    const badge = e.target.closest('.summary-badge');
+    if (!badge) return;
+    const priority = badge.textContent.split(':')[0].toLowerCase();
+    // Show only that priority in filter
+    PRIORITIES.forEach(p => {
+      filterState[p] = (p === priority);
+      const c = getChip(p);
+      c.querySelector('input').checked = filterState[p];
+      if (filterState[p]) c.classList.add('selected'); else c.classList.remove('selected');
+    });
+    syncSelectAllChip();
+    applyCardVisibility();
+  });
+</script>
+</body>
+</html>
