@@ -36,6 +36,7 @@
       top: 0;
       z-index: 10;
       background: linear-gradient(135deg, var(--primary-dark), var(--primary));
+      border-bottom: 4px solid #ffc857;
       color: #ffffff;
       box-shadow: var(--shadow);
     }
@@ -55,11 +56,12 @@
       align-items: center;
       gap: 0.75rem;
       min-width: 0;
+      width: 100%;
     }
 
     .admin-title h2 {
       margin: 0;
-      font-size: 1rem;
+      font-size: 1.1rem;
       letter-spacing: 0.02em;
     }
 
@@ -74,24 +76,41 @@
     }
 
     .gear-button {
-      border: 1px solid rgba(255, 255, 255, 0.45);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.55rem;
+      border: 2px solid #ffffff;
       border-radius: 999px;
-      width: 2.5rem;
-      height: 2.5rem;
+      min-width: 10.5rem;
+      min-height: 2.75rem;
+      padding: 0.55rem 1rem;
       flex: 0 0 auto;
-      color: #ffffff;
-      background: rgba(255, 255, 255, 0.14);
+      color: var(--primary-dark);
+      background: #ffffff;
       cursor: pointer;
-      font-size: 1.25rem;
+      font-size: 0.95rem;
+      font-weight: 800;
       line-height: 1;
-      transition: transform 160ms ease, background 160ms ease;
+      box-shadow: 0 8px 22px rgba(0, 0, 0, 0.18);
+      transition: transform 160ms ease, box-shadow 160ms ease;
     }
 
     .gear-button:hover,
     .gear-button:focus-visible {
-      background: rgba(255, 255, 255, 0.24);
       outline: none;
-      transform: rotate(18deg);
+      transform: translateY(-1px);
+      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.24);
+    }
+
+    .gear-icon {
+      display: inline-block;
+      font-size: 1.25rem;
+      line-height: 1;
+    }
+
+    .gear-label {
+      white-space: nowrap;
     }
 
     .admin-panel {
@@ -293,6 +312,15 @@
       .admin-summary {
         max-width: 52vw;
       }
+
+      .gear-button {
+        min-width: 3rem;
+        padding: 0.65rem;
+      }
+
+      .gear-label {
+        display: none;
+      }
     }
   </style>
 </head>
@@ -308,7 +336,8 @@
           aria-expanded="false"
           title="Open Admin settings"
         >
-          &#9881;
+          <span class="gear-icon" aria-hidden="true">&#9881;</span>
+          <span class="gear-label">Admin Settings</span>
         </button>
         <div>
           <h2>Admin</h2>
