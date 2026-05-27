@@ -398,7 +398,7 @@
           <span class="gear-label">Admin Settings</span>
         </button>
         <div>
-          <h2>Admin</h2>
+          <h2>Azure DevOps Connection — PACE Initiative</h2>
           <p class="admin-summary" id="adminSummary">
             Configure the ADO source for epics and features.
           </p>
@@ -441,6 +441,17 @@
           </div>
 
           <div class="form-field">
+            <label for="workItemTypes">Work Item Types</label>
+            <input
+              id="workItemTypes"
+              name="workItemTypes"
+              type="text"
+              placeholder="Example: Epic, Feature"
+            />
+            <span class="field-help">Comma-separated ADO work item types Cursor should evaluate.</span>
+          </div>
+
+          <div class="form-field">
             <label for="adoPat">ADO personal access token</label>
             <input
               id="adoPat"
@@ -461,6 +472,16 @@
               placeholder="Example: FY26 PACE Key Results"
             />
             <span class="field-help">Optional: limit child lookups to a named group of Key Results.</span>
+          </div>
+
+          <div class="form-field full-width">
+            <label for="workItemTypeSearchCriteria">Work item type search criteria</label>
+            <textarea
+              id="workItemTypeSearchCriteria"
+              name="workItemTypeSearchCriteria"
+              placeholder="Tell Cursor how to match work item types. Example: Compare System.WorkItemType exactly against the values listed in Work Item Types. Treat Epic as a Related work item to the anchor and Feature as a child descendant within 3 levels."
+            ></textarea>
+            <span class="field-help">Describe the criteria Cursor should use when deciding whether ADO items match the Work Item Types list.</span>
           </div>
 
           <div class="form-field full-width">
@@ -576,6 +597,8 @@
           adoSourceType: form.adoSourceType.value,
           adoSourceValue: form.adoSourceValue.value.trim(),
           pullStrategy: form.pullStrategy.value,
+          workItemTypes: form.workItemTypes.value.trim(),
+          workItemTypeSearchCriteria: form.workItemTypeSearchCriteria.value.trim(),
           keyResultGroup: form.keyResultGroup.value.trim(),
           pullInstructions: form.pullInstructions.value.trim()
         };
@@ -607,8 +630,14 @@
         var keyResultText = settings.keyResultGroup
           ? " Key Result group: " + settings.keyResultGroup + "."
           : "";
+        var workItemTypesText = settings.workItemTypes
+          ? "<br><strong>Work Item Types:</strong> " + escapeHtml(settings.workItemTypes)
+          : "";
+        var searchCriteriaText = settings.workItemTypeSearchCriteria
+          ? "<br><strong>Type search criteria:</strong> " + escapeHtml(settings.workItemTypeSearchCriteria)
+          : "";
         var instructions = settings.pullInstructions
-          ? " Instructions: " + settings.pullInstructions
+          ? "<br><strong>Pullup instructions:</strong> " + escapeHtml(settings.pullInstructions)
           : "";
 
         summary.textContent = hasSource
@@ -621,7 +650,9 @@
           "<br><strong>Pullup method:</strong> " +
           escapeHtml(strategy) +
           escapeHtml(keyResultText) +
-          escapeHtml(instructions);
+          workItemTypesText +
+          searchCriteriaText +
+          instructions;
       }
 
       function escapeHtml(value) {
@@ -647,6 +678,9 @@
           adoSourceType: "ado-item",
           adoSourceValue: defaultAnchorUrl,
           pullStrategy: "related",
+          workItemTypes: "Epic, Feature",
+          workItemTypeSearchCriteria:
+            "Match ADO System.WorkItemType exactly against the values listed in Work Item Types. Use Epic matches from Related links to the anchor, then use Feature matches from child descendants up to 3 levels below each Epic.",
           keyResultGroup: "",
           pullInstructions:
             "Find Epics that have a Related link to anchor ADO item 11287400, then find Feature work items that are children or descendants up to 3 levels below those Epics."
@@ -663,6 +697,14 @@
             settings.pullInstructions = defaults.pullInstructions;
           }
 
+          if (!settings.workItemTypes) {
+            settings.workItemTypes = defaults.workItemTypes;
+          }
+
+          if (!settings.workItemTypeSearchCriteria) {
+            settings.workItemTypeSearchCriteria = defaults.workItemTypeSearchCriteria;
+          }
+
           return settings;
         } catch (error) {
           return defaults;
@@ -673,6 +715,8 @@
         form.adoSourceType.value = settings.adoSourceType;
         form.adoSourceValue.value = settings.adoSourceValue;
         form.pullStrategy.value = settings.pullStrategy;
+        form.workItemTypes.value = settings.workItemTypes;
+        form.workItemTypeSearchCriteria.value = settings.workItemTypeSearchCriteria;
         form.keyResultGroup.value = settings.keyResultGroup;
         form.pullInstructions.value = settings.pullInstructions;
         form.adoPat.value = sessionStorage.getItem(patStorageKey) || "";
