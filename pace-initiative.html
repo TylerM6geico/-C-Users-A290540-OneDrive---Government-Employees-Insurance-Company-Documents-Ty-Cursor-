@@ -1,0 +1,1136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PACE Initiative Dashboard</title>
+  <style>
+    :root {
+      --bg: #f4f7fb;
+      --surface: #ffffff;
+      --surface-muted: #eef3f8;
+      --border: #d6e0eb;
+      --text: #162033;
+      --muted: #5d6b7c;
+      --primary: #235a9f;
+      --primary-dark: #173f73;
+      --accent: #2b8a6f;
+      --shadow: 0 18px 45px rgba(22, 32, 51, 0.12);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--bg);
+      color: var(--text);
+      font-family: Arial, Helvetica, sans-serif;
+      line-height: 1.45;
+    }
+
+    .admin-shell {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background: linear-gradient(135deg, var(--primary-dark), var(--primary));
+      border-bottom: 4px solid #ffc857;
+      color: #ffffff;
+      box-shadow: var(--shadow);
+    }
+
+    .admin-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 0.75rem 1.25rem;
+    }
+
+    .admin-title {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      min-width: 0;
+      width: 100%;
+    }
+
+    .admin-title h2 {
+      margin: 0;
+      font-size: 1.1rem;
+      letter-spacing: 0.02em;
+    }
+
+    .admin-summary {
+      margin: 0.15rem 0 0;
+      color: rgba(255, 255, 255, 0.78);
+      font-size: 0.85rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 70vw;
+    }
+
+    .gear-button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.55rem;
+      border: 2px solid #ffffff;
+      border-radius: 999px;
+      min-width: 10.5rem;
+      min-height: 2.75rem;
+      padding: 0.55rem 1rem;
+      flex: 0 0 auto;
+      color: var(--primary-dark);
+      background: #ffffff;
+      cursor: pointer;
+      font-size: 0.95rem;
+      font-weight: 800;
+      line-height: 1;
+      box-shadow: 0 8px 22px rgba(0, 0, 0, 0.18);
+      transition: transform 160ms ease, box-shadow 160ms ease;
+    }
+
+    .gear-button:hover,
+    .gear-button:focus-visible {
+      outline: none;
+      transform: translateY(-1px);
+      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.24);
+    }
+
+    .gear-icon {
+      display: inline-block;
+      font-size: 1.25rem;
+      line-height: 1;
+    }
+
+    .gear-label {
+      white-space: nowrap;
+    }
+
+    .admin-panel {
+      display: grid;
+      grid-template-rows: 1fr;
+      transition: grid-template-rows 180ms ease;
+    }
+
+    .admin-panel[hidden] {
+      display: none;
+    }
+
+    .admin-panel-inner {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 0 1.25rem 1.25rem;
+    }
+
+    .admin-card {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 1rem;
+      background: rgba(255, 255, 255, 0.12);
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      border-radius: 18px;
+      padding: 1rem;
+      backdrop-filter: blur(8px);
+    }
+
+    .form-field {
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+    }
+
+    .form-field.full-width {
+      grid-column: 1 / -1;
+    }
+
+    label {
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    input,
+    select,
+    textarea {
+      width: 100%;
+      border: 1px solid rgba(255, 255, 255, 0.35);
+      border-radius: 12px;
+      padding: 0.75rem 0.8rem;
+      color: #12213a;
+      background: #ffffff;
+      font: inherit;
+    }
+
+    textarea {
+      min-height: 6rem;
+      resize: vertical;
+    }
+
+    .field-help {
+      color: rgba(255, 255, 255, 0.74);
+      font-size: 0.82rem;
+    }
+
+    .admin-actions {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      gap: 0.75rem;
+      grid-column: 1 / -1;
+    }
+
+    .button {
+      border: 0;
+      border-radius: 999px;
+      padding: 0.72rem 1.1rem;
+      cursor: pointer;
+      font-weight: 700;
+    }
+
+    .button.primary {
+      color: var(--primary-dark);
+      background: #ffffff;
+    }
+
+    .button.secondary {
+      color: #ffffff;
+      background: rgba(255, 255, 255, 0.18);
+      border: 1px solid rgba(255, 255, 255, 0.35);
+    }
+
+    main {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 2rem 1.25rem 3rem;
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: minmax(0, 1.3fr) minmax(280px, 0.7fr);
+      gap: 1.5rem;
+      align-items: stretch;
+      margin-bottom: 1.5rem;
+    }
+
+    .panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 1.5rem;
+      box-shadow: 0 12px 28px rgba(22, 32, 51, 0.07);
+    }
+
+    .eyebrow {
+      margin: 0 0 0.4rem;
+      color: var(--accent);
+      font-size: 0.8rem;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(2rem, 4vw, 3.35rem);
+      line-height: 1.05;
+    }
+
+    .hero-copy {
+      max-width: 68ch;
+      color: var(--muted);
+      font-size: 1.04rem;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 1rem;
+    }
+
+    .stat {
+      background: var(--surface-muted);
+      border-radius: 18px;
+      padding: 1rem;
+    }
+
+    .stat strong {
+      display: block;
+      font-size: 1.8rem;
+      color: var(--primary-dark);
+    }
+
+    .stat span {
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    .content-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 1rem;
+    }
+
+    .content-card h3 {
+      margin-top: 0;
+    }
+
+    .content-card ul {
+      margin: 0;
+      padding-left: 1.2rem;
+      color: var(--muted);
+    }
+
+    .config-preview {
+      margin-top: 1rem;
+      padding: 1rem;
+      border: 1px dashed var(--border);
+      border-radius: 18px;
+      color: var(--muted);
+      background: #fbfdff;
+      font-size: 0.95rem;
+    }
+
+    .config-preview strong {
+      color: var(--text);
+    }
+
+    .sync-message {
+      margin-top: 1rem;
+      padding: 0.85rem 1rem;
+      border-radius: 14px;
+      background: #fff7df;
+      border: 1px solid #f0d990;
+      color: #69501d;
+      font-size: 0.92rem;
+    }
+
+    .sync-message[data-state="success"] {
+      background: #e9f7f1;
+      border-color: #a8dec8;
+      color: #1d684f;
+    }
+
+    .sync-message[data-state="error"] {
+      background: #fdebea;
+      border-color: #f1b6b1;
+      color: #8a2d27;
+    }
+
+    .item-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.8rem;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+      color: var(--muted);
+    }
+
+    .item-list li {
+      padding: 0.85rem;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      background: #fbfdff;
+    }
+
+    .work-item-link {
+      display: inline-block;
+      margin-bottom: 0.35rem;
+      color: var(--primary-dark);
+      font-weight: 800;
+      text-decoration: none;
+    }
+
+    .work-item-link:hover,
+    .work-item-link:focus-visible {
+      text-decoration: underline;
+    }
+
+    .item-meta {
+      display: block;
+      color: var(--muted);
+      font-size: 0.85rem;
+    }
+
+    @media (max-width: 820px) {
+      .admin-card,
+      .hero,
+      .content-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .admin-summary {
+        max-width: 52vw;
+      }
+
+      .gear-button {
+        min-width: 3rem;
+        padding: 0.65rem;
+      }
+
+      .gear-label {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <section class="admin-shell" aria-label="Dashboard administration">
+    <div class="admin-header">
+      <div class="admin-title">
+        <button
+          class="gear-button"
+          id="adminToggle"
+          type="button"
+          aria-controls="adminPanel"
+          aria-expanded="false"
+          title="Open Admin settings"
+        >
+          <span class="gear-icon" aria-hidden="true">&#9881;</span>
+          <span class="gear-label">Admin Settings</span>
+        </button>
+        <div>
+          <h2>Azure DevOps Connection — PACE Initiative</h2>
+          <p class="admin-summary" id="adminSummary">
+            Configure the ADO source for program status work items.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="admin-panel" id="adminPanel" hidden>
+      <div class="admin-panel-inner">
+        <form class="admin-card" id="adminForm">
+          <div class="form-field">
+            <label for="adoSourceType">ADO source type</label>
+            <select id="adoSourceType" name="adoSourceType">
+              <option value="ado-item">ADO item ID or URL</option>
+              <option value="backlog">ADO backlog path</option>
+              <option value="query">ADO query URL</option>
+            </select>
+            <span class="field-help">Choose how the dashboard should locate the starting point.</span>
+          </div>
+
+          <div class="form-field">
+            <label for="adoSourceValue">ADO item or backlog</label>
+            <input
+              id="adoSourceValue"
+              name="adoSourceValue"
+              type="text"
+              placeholder="Example: Project/Area/Backlog, work item #12345, or ADO URL"
+            />
+            <span class="field-help">Enter the ADO item, backlog, area path, or query the dashboard should pull from.</span>
+          </div>
+
+          <div class="form-field">
+            <label for="pullStrategy">Program status pullup method</label>
+            <select id="pullStrategy" name="pullStrategy">
+              <option value="related">Direct Related/Child items + descendants up to 3 levels</option>
+              <option value="key-result-children">Use children under Key Result groups</option>
+              <option value="custom">Use custom instructions below</option>
+            </select>
+            <span class="field-help">Defines whether program status items come from links, hierarchy, or custom rules.</span>
+          </div>
+
+          <div class="form-field">
+            <label for="workItemTypes">Work Item Types</label>
+            <input
+              id="workItemTypes"
+              name="workItemTypes"
+              type="text"
+              placeholder="Example: All, Epic, Feature, User Story"
+            />
+            <span class="field-help">Optional comma-separated ADO work item types for reporting notes; direct anchor links are loaded regardless of type.</span>
+          </div>
+
+          <div class="form-field">
+            <label for="adoPat">ADO personal access token</label>
+            <input
+              id="adoPat"
+              name="adoPat"
+              type="password"
+              autocomplete="off"
+              placeholder="Optional; stored only in this browser tab session"
+            />
+            <span class="field-help">Use when your browser session cannot call the ADO REST API directly.</span>
+          </div>
+
+          <div class="form-field">
+            <label for="keyResultGroup">Key Result group filter</label>
+            <input
+              id="keyResultGroup"
+              name="keyResultGroup"
+              type="text"
+              placeholder="Example: FY26 PACE Key Results"
+            />
+            <span class="field-help">Optional: limit child lookups to a named group of Key Results.</span>
+          </div>
+
+          <div class="form-field full-width">
+            <label for="workItemTypeSearchCriteria">Work item type search criteria</label>
+            <textarea
+              id="workItemTypeSearchCriteria"
+              name="workItemTypeSearchCriteria"
+              placeholder="Tell Cursor how to match work item types. Example: Compare System.WorkItemType exactly against the values listed in Work Item Types. Treat direct Related or Child links to the anchor as Program Status items, then include descendants within 3 levels."
+            ></textarea>
+            <span class="field-help">Describe the criteria Cursor should use when deciding whether ADO items match the Work Item Types list.</span>
+          </div>
+
+          <div class="form-field full-width">
+            <label for="pullInstructions">Pullup instructions</label>
+            <textarea
+              id="pullInstructions"
+              name="pullInstructions"
+              placeholder="Describe how to pull up program status work. Example: Find items directly related to the selected ADO item, then include items linked as children. If using Key Results, pull child items only from the named Key Result group."
+            ></textarea>
+            <span class="field-help">Use this field to clarify relationship rules, hierarchy depth, filters, or exceptions.</span>
+          </div>
+
+          <div class="admin-actions">
+            <button class="button secondary" type="button" id="resetAdmin">Reset</button>
+            <button class="button secondary" type="button" id="loadAdo">Load from ADO</button>
+            <button class="button primary" type="submit">Save Admin Settings</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <main>
+    <section class="hero">
+      <div class="panel">
+        <p class="eyebrow">PACE Initiative</p>
+        <h1>Portfolio dashboard for program status, descendants, and key results</h1>
+        <p class="hero-copy">
+          This dashboard starts from ADO anchor item 11287400, finds work items that have
+          a Related or Child link to that anchor, then looks up to 3 child levels below
+          each direct item for descendant work items.
+        </p>
+        <div class="config-preview" id="configPreview">
+          <strong>ADO source:</strong> Not configured yet. Open Admin settings to define
+          the ADO item or backlog for this dashboard.
+        </div>
+        <div class="sync-message" id="syncMessage" data-state="idle">
+          Open Admin Settings and choose Load from ADO to pull related/child Program Status items.
+        </div>
+      </div>
+
+      <div class="panel">
+        <p class="eyebrow">Snapshot</p>
+        <div class="stats">
+          <div class="stat">
+            <strong id="directCount">0</strong>
+            <span>Direct items loaded</span>
+          </div>
+          <div class="stat">
+            <strong id="descendantCount">0</strong>
+            <span>Child descendants loaded</span>
+          </div>
+          <div class="stat">
+            <strong id="anchorCount">1</strong>
+            <span>Anchor item</span>
+          </div>
+          <div class="stat">
+            <strong id="syncStatus">--</strong>
+            <span>ADO sync status</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="content-grid" aria-label="Dashboard sections">
+      <article class="panel content-card">
+        <h3>Program Status</h3>
+        <ul class="item-list" id="directList">
+          <li>Direct Related or Child work items will populate from ADO anchor item 11287400.</li>
+        </ul>
+      </article>
+
+      <article class="panel content-card">
+        <h3>Child descendants</h3>
+        <ul class="item-list" id="descendantList">
+          <li>Child descendant data will populate up to 3 levels below each direct Program Status item.</li>
+        </ul>
+      </article>
+
+      <article class="panel content-card">
+        <h3>ADO pull rules</h3>
+        <ul class="item-list">
+          <li>Anchor: work item 11287400 in Corporate Objectives.</li>
+          <li>Program Status criteria: relation type is Related or Child from the anchor item.</li>
+          <li>Descendant criteria: child depth is 1, 2, or 3 below a direct Program Status item.</li>
+        </ul>
+      </article>
+    </section>
+  </main>
+
+  <script>
+    (function () {
+      var storageKey = "paceDashboardAdminSettings";
+      var patStorageKey = "paceDashboardAdoPat";
+      var defaultAnchorUrl =
+        "https://geico.visualstudio.com/Corporate%20Objectives/_workitems/edit/11287400";
+      var toggle = document.getElementById("adminToggle");
+      var panel = document.getElementById("adminPanel");
+      var form = document.getElementById("adminForm");
+      var summary = document.getElementById("adminSummary");
+      var preview = document.getElementById("configPreview");
+      var reset = document.getElementById("resetAdmin");
+      var loadAdo = document.getElementById("loadAdo");
+      var syncMessage = document.getElementById("syncMessage");
+      var directCount = document.getElementById("directCount");
+      var descendantCount = document.getElementById("descendantCount");
+      var syncStatus = document.getElementById("syncStatus");
+      var directList = document.getElementById("directList");
+      var descendantList = document.getElementById("descendantList");
+
+      function getSettingsFromForm() {
+        return {
+          adoSourceType: form.adoSourceType.value,
+          adoSourceValue: form.adoSourceValue.value.trim(),
+          pullStrategy: form.pullStrategy.value,
+          workItemTypes: form.workItemTypes.value.trim(),
+          workItemTypeSearchCriteria: form.workItemTypeSearchCriteria.value.trim(),
+          keyResultGroup: form.keyResultGroup.value.trim(),
+          pullInstructions: form.pullInstructions.value.trim()
+        };
+      }
+
+      function sourceTypeLabel(value) {
+        var labels = {
+          "ado-item": "ADO item",
+          backlog: "ADO backlog",
+          query: "ADO query"
+        };
+        return labels[value] || "ADO source";
+      }
+
+      function strategyLabel(value) {
+        var labels = {
+          related: "Direct Related/Child items + descendants up to 3 levels",
+          "key-result-children": "children under Key Result groups",
+          custom: "custom instructions"
+        };
+        return labels[value] || "configured rules";
+      }
+
+      function renderSettings(settings) {
+        var hasSource = Boolean(settings.adoSourceValue);
+        var source = hasSource ? settings.adoSourceValue : "Not configured";
+        var strategy = strategyLabel(settings.pullStrategy);
+        var sourceLabel = sourceTypeLabel(settings.adoSourceType);
+        var keyResultText = settings.keyResultGroup
+          ? " Key Result group: " + settings.keyResultGroup + "."
+          : "";
+        var workItemTypesText = settings.workItemTypes
+          ? "<br><strong>Work Item Types:</strong> " + escapeHtml(settings.workItemTypes)
+          : "";
+        var searchCriteriaText = settings.workItemTypeSearchCriteria
+          ? "<br><strong>Type search criteria:</strong> " + escapeHtml(settings.workItemTypeSearchCriteria)
+          : "";
+        var instructions = settings.pullInstructions
+          ? "<br><strong>Pullup instructions:</strong> " + escapeHtml(settings.pullInstructions)
+          : "";
+
+        summary.textContent = hasSource
+          ? sourceLabel + ": " + source + " | Pullup: " + strategy
+          : "Configure the ADO source for program status items.";
+
+        preview.innerHTML =
+          "<strong>ADO source:</strong> " +
+          escapeHtml(sourceLabel + " - " + source) +
+          "<br><strong>Pullup method:</strong> " +
+          escapeHtml(strategy) +
+          escapeHtml(keyResultText) +
+          workItemTypesText +
+          searchCriteriaText +
+          instructions;
+      }
+
+      function escapeHtml(value) {
+        return value.replace(/[&<>"']/g, function (character) {
+          return {
+            "&": "&amp;",
+            "<": "&lt;",
+            ">": "&gt;",
+            '"': "&quot;",
+            "'": "&#039;"
+          }[character];
+        });
+      }
+
+      function saveSettings(settings) {
+        localStorage.setItem(storageKey, JSON.stringify(settings));
+        sessionStorage.setItem(patStorageKey, form.adoPat.value.trim());
+        renderSettings(settings);
+      }
+
+      function loadSettings() {
+        var defaults = {
+          adoSourceType: "ado-item",
+          adoSourceValue: defaultAnchorUrl,
+          pullStrategy: "related",
+          workItemTypes: "All",
+          workItemTypeSearchCriteria:
+            "Load every direct Related or Child link to the anchor as a Program Status item regardless of work item type. When filtering is needed later, compare ADO System.WorkItemType exactly against the values listed in Work Item Types.",
+          keyResultGroup: "",
+          pullInstructions:
+            "Find work items that have a Related or Child link to anchor ADO item 11287400, then find work items that are children or descendants up to 3 levels below those direct items."
+        };
+
+        try {
+          var settings = Object.assign({}, defaults, JSON.parse(localStorage.getItem(storageKey)) || {});
+
+          if (!settings.adoSourceValue) {
+            settings.adoSourceValue = defaultAnchorUrl;
+          }
+
+          if (!settings.pullInstructions) {
+            settings.pullInstructions = defaults.pullInstructions;
+          }
+
+          if (!settings.workItemTypes) {
+            settings.workItemTypes = defaults.workItemTypes;
+          }
+
+          if (!settings.workItemTypeSearchCriteria) {
+            settings.workItemTypeSearchCriteria = defaults.workItemTypeSearchCriteria;
+          }
+
+          return settings;
+        } catch (error) {
+          return defaults;
+        }
+      }
+
+      function hydrateForm(settings) {
+        form.adoSourceType.value = settings.adoSourceType;
+        form.adoSourceValue.value = settings.adoSourceValue;
+        form.pullStrategy.value = settings.pullStrategy;
+        form.workItemTypes.value = settings.workItemTypes;
+        form.workItemTypeSearchCriteria.value = settings.workItemTypeSearchCriteria;
+        form.keyResultGroup.value = settings.keyResultGroup;
+        form.pullInstructions.value = settings.pullInstructions;
+        form.adoPat.value = sessionStorage.getItem(patStorageKey) || "";
+      }
+
+      function setPanelOpen(isOpen) {
+        panel.hidden = !isOpen;
+        toggle.setAttribute("aria-expanded", String(isOpen));
+        toggle.title = isOpen ? "Close Admin settings" : "Open Admin settings";
+      }
+
+      function setSyncState(state, message) {
+        syncMessage.dataset.state = state;
+        syncMessage.textContent = message;
+        loadAdo.disabled = state === "loading";
+        syncStatus.textContent =
+          state === "success" ? "OK" : state === "error" ? "Error" : state === "loading" ? "Loading" : "--";
+      }
+
+      function parseWorkItemId(value) {
+        var editUrlMatch = value.match(/\/_workitems\/edit\/(\d+)/i);
+        var workItemUrlMatch = value.match(/\/workItems\/(\d+)/i);
+        var numberMatch = value.match(/\b(\d{5,})\b/);
+
+        if (editUrlMatch) {
+          return editUrlMatch[1];
+        }
+
+        if (workItemUrlMatch) {
+          return workItemUrlMatch[1];
+        }
+
+        if (numberMatch) {
+          return numberMatch[1];
+        }
+
+        throw new Error("Enter an ADO work item URL or numeric work item ID.");
+      }
+
+      function getAdoContext(value) {
+        var source = value || defaultAnchorUrl;
+
+        try {
+          var url = new URL(source);
+          var pathParts = url.pathname.split("/").filter(Boolean);
+
+          if (url.hostname.indexOf(".visualstudio.com") !== -1) {
+            var visualStudioProject = pathParts[0] || "Corporate%20Objectives";
+
+            return {
+              apiRoot: url.origin + "/" + visualStudioProject + "/_apis/wit",
+              webItemRoot: url.origin + "/" + visualStudioProject + "/_workitems/edit/"
+            };
+          }
+
+          if (url.hostname === "dev.azure.com" && pathParts.length >= 2) {
+            var org = pathParts[0];
+            var project = pathParts[1];
+
+            return {
+              apiRoot: url.origin + "/" + org + "/" + project + "/_apis/wit",
+              webItemRoot: url.origin + "/" + org + "/" + project + "/_workitems/edit/"
+            };
+          }
+        } catch (error) {
+          // Numeric-only IDs use the known GEICO Corporate Objectives project by default.
+        }
+
+        return {
+          apiRoot: "https://geico.visualstudio.com/Corporate%20Objectives/_apis/wit",
+          webItemRoot: "https://geico.visualstudio.com/Corporate%20Objectives/_workitems/edit/"
+        };
+      }
+
+      function getFetchOptions(pat) {
+        var headers = {
+          Accept: "application/json"
+        };
+
+        if (pat) {
+          headers.Authorization = "Basic " + btoa(":" + pat);
+        }
+
+        return {
+          headers: headers,
+          credentials: pat ? "omit" : "include"
+        };
+      }
+
+      function fetchWorkItem(id, context, pat) {
+        var url = new URL(context.apiRoot + "/workitems/" + encodeURIComponent(id));
+        url.searchParams.set("$expand", "relations");
+        url.searchParams.set("api-version", "7.1");
+
+        return fetch(url.toString(), getFetchOptions(pat)).then(function (response) {
+          if (!response.ok) {
+            throw new Error("ADO returned " + response.status + " while loading work item " + id + ".");
+          }
+
+          return response.json();
+        });
+      }
+
+      function fetchWorkItems(ids, context, pat) {
+        var uniqueIds = uniqueValues(ids);
+        var batches = [];
+        var batchSize = 100;
+
+        if (!uniqueIds.length) {
+          return Promise.resolve([]);
+        }
+
+        for (var index = 0; index < uniqueIds.length; index += batchSize) {
+          batches.push(uniqueIds.slice(index, index + batchSize));
+        }
+
+        return Promise.all(
+          batches.map(function (batchIds) {
+            var url = new URL(context.apiRoot + "/workitems");
+            url.searchParams.set("ids", batchIds.join(","));
+            url.searchParams.set("$expand", "relations");
+            url.searchParams.set("api-version", "7.1");
+
+            return fetch(url.toString(), getFetchOptions(pat)).then(function (response) {
+              if (!response.ok) {
+                throw new Error("ADO returned " + response.status + " while loading work item batch.");
+              }
+
+              return response.json();
+            });
+          })
+        ).then(function (responses) {
+          return uniqueById(
+            [].concat.apply(
+              [],
+              responses.map(function (response) {
+                return response.value || [];
+              })
+            )
+          );
+        });
+      }
+
+      function getRelationTargetId(relation) {
+        var match = relation.url && relation.url.match(/\/workItems\/(\d+)$/i);
+        return match ? match[1] : null;
+      }
+
+      function getRelatedIds(workItem) {
+        return (workItem.relations || [])
+          .filter(function (relation) {
+            var rel = relation.rel || "";
+            var name = ((relation.attributes && relation.attributes.name) || "").toLowerCase();
+            return rel === "System.LinkTypes.Related" || name === "related";
+          })
+          .map(getRelationTargetId)
+          .filter(Boolean);
+      }
+
+      function getChildIds(workItem) {
+        return (workItem.relations || [])
+          .filter(function (relation) {
+            var rel = relation.rel || "";
+            var name = ((relation.attributes && relation.attributes.name) || "").toLowerCase();
+            return rel === "System.LinkTypes.Hierarchy-Forward" || name === "child";
+          })
+          .map(getRelationTargetId)
+          .filter(Boolean);
+      }
+
+      function workItemType(workItem) {
+        return workItem.fields && workItem.fields["System.WorkItemType"];
+      }
+
+      function workItemTitle(workItem) {
+        return (workItem.fields && workItem.fields["System.Title"]) || "Untitled";
+      }
+
+      function workItemState(workItem) {
+        return (workItem.fields && workItem.fields["System.State"]) || "No state";
+      }
+
+      function workItemUrl(workItem, context) {
+        if (workItem._links && workItem._links.html && workItem._links.html.href) {
+          return workItem._links.html.href;
+        }
+
+        return context.webItemRoot + workItem.id;
+      }
+
+      function renderWorkItemList(list, items, emptyText, context, extraMeta) {
+        list.innerHTML = "";
+
+        if (!items.length) {
+          var emptyItem = document.createElement("li");
+          emptyItem.textContent = emptyText;
+          list.appendChild(emptyItem);
+          return;
+        }
+
+        items.forEach(function (item) {
+          var li = document.createElement("li");
+          var link = document.createElement("a");
+          var meta = document.createElement("span");
+
+          link.className = "work-item-link";
+          link.href = workItemUrl(item, context);
+          link.target = "_blank";
+          link.rel = "noreferrer";
+          link.textContent = "#" + item.id + " - " + workItemTitle(item);
+
+          meta.className = "item-meta";
+          meta.textContent =
+            workItemType(item) +
+            " | " +
+            workItemState(item) +
+            (extraMeta ? " | " + extraMeta(item) : "");
+
+          li.appendChild(link);
+          li.appendChild(meta);
+          list.appendChild(li);
+        });
+      }
+
+      function uniqueById(items) {
+        var seen = {};
+
+        return items.filter(function (item) {
+          if (seen[item.id]) {
+            return false;
+          }
+
+          seen[item.id] = true;
+          return true;
+        });
+      }
+
+      function uniqueValues(values) {
+        var seen = {};
+
+        return values.filter(function (value) {
+          if (!value || seen[value]) {
+            return false;
+          }
+
+          seen[value] = true;
+          return true;
+        });
+      }
+
+      function findChildDescendants(rootItem, context, pat, maxDepth, descendantMeta) {
+        var descendants = [];
+        var visited = {};
+
+        function walk(parent, depth) {
+          if (depth >= maxDepth) {
+            return Promise.resolve();
+          }
+
+          var childDepth = depth + 1;
+          var childIds = getChildIds(parent).filter(function (id) {
+            return !visited[id];
+          });
+
+          childIds.forEach(function (id) {
+            visited[id] = true;
+          });
+
+          return fetchWorkItems(childIds, context, pat).then(function (children) {
+            children.forEach(function (child) {
+              child._paceRootId = rootItem.id;
+              child._paceDepth = childDepth;
+              descendants.push(child);
+              descendantMeta[child.id] = {
+                rootId: rootItem.id,
+                parentId: parent.id,
+                depth: childDepth
+              };
+            });
+
+            return Promise.all(
+              children.map(function (child) {
+                return walk(child, childDepth);
+              })
+            );
+          });
+        }
+
+        return walk(rootItem, 0).then(function () {
+          return descendants;
+        });
+      }
+
+      function loadAdoItems() {
+        var settings = getSettingsFromForm();
+        var pat = form.adoPat.value.trim();
+        var anchorId;
+        var context;
+
+        saveSettings(settings);
+        setSyncState("loading", "Loading anchor item, direct related/child items, and descendants from ADO...");
+
+        try {
+          anchorId = parseWorkItemId(settings.adoSourceValue);
+          context = getAdoContext(settings.adoSourceValue);
+        } catch (error) {
+          setSyncState("error", error.message);
+          return Promise.resolve();
+        }
+
+        return fetchWorkItem(anchorId, context, pat)
+          .then(function (anchor) {
+            var relatedIds = getRelatedIds(anchor);
+            var anchorChildIds = getChildIds(anchor);
+            var directIds = uniqueValues(relatedIds.concat(anchorChildIds));
+
+            if (!directIds.length) {
+              return {
+                context: context,
+                anchorId: anchorId,
+                directItems: [],
+                descendants: [],
+                descendantMeta: {}
+              };
+            }
+
+            return fetchWorkItems(directIds, context, pat).then(function (directItems) {
+              var descendantMeta = {};
+
+              return Promise.all(
+                directItems.map(function (item) {
+                  return findChildDescendants(item, context, pat, 3, descendantMeta);
+                })
+              ).then(function (descendantGroups) {
+                return {
+                  context: context,
+                  anchorId: anchorId,
+                  directItems: uniqueById(directItems),
+                  descendants: uniqueById([].concat.apply([], descendantGroups)),
+                  descendantMeta: descendantMeta
+                };
+              });
+            });
+          })
+          .then(function (result) {
+            directCount.textContent = result.directItems.length;
+            descendantCount.textContent = result.descendants.length;
+
+            renderWorkItemList(
+              directList,
+              result.directItems,
+              "No direct Related or Child work items were found under PACE anchor #" + result.anchorId + ".",
+              result.context
+            );
+            renderWorkItemList(
+              descendantList,
+              result.descendants,
+              "No child descendants were found within 3 levels below the direct Program Status items.",
+              result.context,
+              function (item) {
+                var meta = result.descendantMeta[item.id] || {};
+                return "Direct item #" + meta.rootId + ", parent #" + meta.parentId + ", depth " + meta.depth;
+              }
+            );
+
+            setSyncState(
+              "success",
+              "Loaded " +
+                result.directItems.length +
+                " direct related/child item(s) and " +
+                result.descendants.length +
+                " child descendant(s) from ADO."
+            );
+          })
+          .catch(function (error) {
+            setSyncState(
+              "error",
+              error.message +
+                " If this file is opened locally, enter an ADO PAT in Admin Settings or use an authenticated browser session that permits ADO REST API calls."
+            );
+          });
+      }
+
+      toggle.addEventListener("click", function () {
+        setPanelOpen(panel.hidden);
+      });
+
+      form.addEventListener("submit", function (event) {
+        event.preventDefault();
+        setPanelOpen(false);
+        loadAdoItems();
+      });
+
+      loadAdo.addEventListener("click", function () {
+        loadAdoItems();
+      });
+
+      reset.addEventListener("click", function () {
+        localStorage.removeItem(storageKey);
+        sessionStorage.removeItem(patStorageKey);
+        var settings = loadSettings();
+        hydrateForm(settings);
+        renderSettings(settings);
+        directCount.textContent = "0";
+        descendantCount.textContent = "0";
+        setSyncState("idle", "Open Admin Settings and choose Load from ADO to pull related/child Program Status items.");
+      });
+
+      var settings = loadSettings();
+      hydrateForm(settings);
+      renderSettings(settings);
+      setPanelOpen(false);
+      loadAdoItems();
+    })();
+  </script>
+</body>
+</html>
